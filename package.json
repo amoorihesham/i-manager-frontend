@@ -7,10 +7,14 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "eslint",
+		"format": "prettier -w .",
 		"prepare": "husky"
 	},
 	"lint-staged": {
-		"**/*": "eslint --fix && prettier --write --ignore-unknown"
+		"**/*": [
+			"eslint --fix",
+			"prettier -w ."
+		]
 	},
 	"dependencies": {
 		"@tanstack/react-form": "^1.29.1",
