@@ -1,0 +1,1906 @@
+openapi: 3.0.3
+info:
+  title: i-manager API
+  version: 1.0.0
+  description: |
+    Project management REST API built with Fastify v5, TypeScript, and PostgreSQL.
+
+    ## Authentication
+    Most endpoints require a valid `accessToken` JWT cookie set during login.
+    Protected routes return `401 Unauthorized` when the cookie is missing or invalid.
+
+    ## Plan Tiers
+    | Tier  | Workspaces | Members/Workspace | Projects/Workspace |
+    |-------|-----------|-------------------|-------------------|
+    | free  | 1         | 3                 | 2                 |
+    | pro   | 5         | 15                | 20                |
+    | ultra | ∞         | ∞                 | ∞                 |
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Local development
+  - url: https://{host}/api/v1
+    description: Production
+    variables:
+      host:
+        default: your-domain.com
+
+tags:
+  - name: Auth
+    description: Registration and login
+  - name: Billing
+    description: Stripe subscriptions and webhooks
+  - name: Workspaces
+    description: Workspace CRUD and member management
+  - name: Projects
+    description: Project CRUD and member management
+  - name: Tasks
+    description: Task CRUD within projects
+  - name: Invitations
+    description: Invitation lifecycle (preview, accept, revoke)
+
+security:
+  - cookieAuth: []
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: accessToken
+
+  schemas:
+    # ─── Primitives ──────────────────────────────────────────────────────────
+    UUID:
+      type: string
+      format: uuid
+      example: 550e8400-e29b-41d4-a716-446655440000
+
+    ISODateTime:
+      type: string
+      format: date-time
+      example: "2026-04-26T12:00:00.000Z"
+
+    # ─── Enums ───────────────────────────────────────────────────────────────
+    UserRole:
+      type: string
+      enum: [user, admin]
+
+    WorkspaceRole:
+      type: string
+      enum: [owner, admin, member]
+
+    ProjectRole:
+      type: string
+      enum: [admin, member]
+
+    TaskStatus:
+      type: string
+      enum: [todo, in_progress, done]
+
+    SubscriptionTier:
+      type: string
+      enum: [free, pro, ultra]
+
+    SubscriptionStatus:
+      type: string
+      enum: [active, past_due, canceled]
+
+    InvitationScope:
+      type: string
+      enum: [workspace, project]
+
+    InvitationStatus:
+      type: string
+      enum: [pending, accepted, revoked, expired]
+
+    # ─── Entities ─────────────────────────────────────────────────────────────
+    User:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/UUID"
+        username:
+          type: string
+          example: johndoe
+        email:
+          type: string
+          format: email
+          example: john@example.com
+        role:
+          $ref: "#/components/schemas/UserRole"
+        createdAt:
+          $ref: "#/components/schemas/ISODateTime"
+        updatedAt:
+          $ref: "#/components/schemas/ISODateTime"
+
+    AuthUser:
+      allOf:
+        - $ref: "#/components/schemas/User"
+        - type: object
+          properties:
+            accessToken:
+              type: string
+              description: JWT access token (also set as httpOnly cookie)
+            refreshToken:
+              type: string
+              description: JWT refresh token (also set as httpOnly cookie)
+
+    Subscription:
+      type: object
+      properties:
+        tier:
+          $ref: "#/components/schemas/SubscriptionTier"
+        status:
+          $ref: "#/components/schemas/SubscriptionStatus"
+
+    Workspace:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/UUID"
+        name:
+          type: string
+          example: My Workspace
+        ownerId:
+          $ref: "#/components/schemas/UUID"
+        createdAt:
+          $ref: "#/components/schemas/ISODateTime"
+        updatedAt:
+          $ref: "#/components/schemas/ISODateTime"
+
+    WorkspaceWithRole:
+      allOf:
+        - $ref: "#/components/schemas/Workspace"
+        - type: object
+          properties:
+            role:
+              $ref: "#/components/schemas/WorkspaceRole"
+
+    WorkspaceMember:
+      type: object
+      properties:
+        userId:
+          $ref: "#/components/schemas/UUID"
+        role:
+          $ref: "#/components/schemas/WorkspaceRole"
+        joinedAt:
+          $ref: "#/components/schemas/ISODateTime"
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+
+    Project:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/UUID"
+        workspaceId:
+          $ref: "#/components/schemas/UUID"
+        name:
+          type: string
+          example: Backend Rewrite
+        description:
+          type: string
+          nullable: true
+          example: Migrate from Express to Fastify
+        createdById:
+          $ref: "#/components/schemas/UUID"
+        createdAt:
+          $ref: "#/components/schemas/ISODateTime"
+        updatedAt:
+          $ref: "#/components/schemas/ISODateTime"
+
+    ProjectMember:
+      type: object
+      properties:
+        userId:
+          $ref: "#/components/schemas/UUID"
+        role:
+          $ref: "#/components/schemas/ProjectRole"
+        joinedAt:
+          $ref: "#/components/schemas/ISODateTime"
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+
+    Task:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/UUID"
+        projectId:
+          $ref: "#/components/schemas/UUID"
+        title:
+          type: string
+          example: Fix login bug
+        description:
+          type: string
+          nullable: true
+        status:
+          $ref: "#/components/schemas/TaskStatus"
+        assigneeId:
+          $ref: "#/components/schemas/UUID"
+          nullable: true
+        createdById:
+          $ref: "#/components/schemas/UUID"
+        createdAt:
+          $ref: "#/components/schemas/ISODateTime"
+        updatedAt:
+          $ref: "#/components/schemas/ISODateTime"
+
+    Invitation:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/UUID"
+        token:
+          type: string
+          description: 64-character hex token
+          example: a3f8c2d1e4b5...
+        email:
+          type: string
+          format: email
+        scope:
+          $ref: "#/components/schemas/InvitationScope"
+        workspaceId:
+          $ref: "#/components/schemas/UUID"
+          nullable: true
+        projectId:
+          $ref: "#/components/schemas/UUID"
+          nullable: true
+        role:
+          type: string
+          example: member
+        invitedById:
+          $ref: "#/components/schemas/UUID"
+        status:
+          $ref: "#/components/schemas/InvitationStatus"
+        expiresAt:
+          $ref: "#/components/schemas/ISODateTime"
+        acceptedAt:
+          $ref: "#/components/schemas/ISODateTime"
+          nullable: true
+        createdAt:
+          $ref: "#/components/schemas/ISODateTime"
+
+    InvitationPreview:
+      type: object
+      properties:
+        scope:
+          $ref: "#/components/schemas/InvitationScope"
+        role:
+          type: string
+        resourceName:
+          type: string
+          description: Name of the workspace or project
+        inviterUsername:
+          type: string
+          nullable: true
+        email:
+          type: string
+          format: email
+        status:
+          $ref: "#/components/schemas/InvitationStatus"
+        expiresAt:
+          $ref: "#/components/schemas/ISODateTime"
+
+    # ─── Response Wrappers ────────────────────────────────────────────────────
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          enum: [false]
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: NOT_FOUND
+            message:
+              type: string
+              example: Resource not found
+
+    PlanLimitErrorResponse:
+      allOf:
+        - $ref: "#/components/schemas/ErrorResponse"
+        - type: object
+          properties:
+            upgradeUrl:
+              type: string
+              example: /billing/checkout
+
+  responses:
+    Unauthorized:
+      description: Missing or invalid access token cookie
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            error:
+              code: UNAUTHORIZED
+              message: Unauthorized
+
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            error:
+              code: FORBIDDEN
+              message: Access denied
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            error:
+              code: NOT_FOUND
+              message: Resource not found
+
+    BadRequest:
+      description: Validation error or bad input
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            error:
+              code: BAD_REQUEST
+              message: Invalid input
+
+    Conflict:
+      description: Resource already exists
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            error:
+              code: CONFLICT
+              message: Resource already exists
+
+    PlanLimitExceeded:
+      description: Subscription plan limit reached
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/PlanLimitErrorResponse"
+          example:
+            success: false
+            error:
+              code: PLAN_LIMIT_EXCEEDED
+              message: You have reached the maximum number of workspaces for your plan
+            upgradeUrl: /billing/checkout
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            error:
+              code: INTERNAL_ERROR
+              message: Something went wrong
+
+paths:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Health
+  # ═══════════════════════════════════════════════════════════════════════════
+  /health:
+    get:
+      summary: Health check
+      operationId: healthCheck
+      security: []
+      tags: []
+      responses:
+        "200":
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    enum: [true]
+              example:
+                ok: true
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Auth
+  # ═══════════════════════════════════════════════════════════════════════════
+  /auth/register:
+    post:
+      summary: Register a new user
+      operationId: registerUser
+      security: []
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, email, password]
+              properties:
+                username:
+                  type: string
+                  minLength: 3
+                  example: johndoe
+                email:
+                  type: string
+                  format: email
+                  example: john@example.com
+                password:
+                  type: string
+                  minLength: 6
+                  format: password
+                  example: secret123
+      responses:
+        "201":
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/User"
+              example:
+                success: true
+                message: User registered successfully
+                data:
+                  id: 550e8400-e29b-41d4-a716-446655440000
+                  username: johndoe
+                  email: john@example.com
+                  role: user
+                  createdAt: "2026-04-26T12:00:00.000Z"
+                  updatedAt: "2026-04-26T12:00:00.000Z"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                success: false
+                error:
+                  code: USER_EXISTS
+                  message: A user with this email already exists
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /auth/login:
+    post:
+      summary: Login and receive JWT cookies
+      operationId: loginUser
+      security: []
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: john@example.com
+                password:
+                  type: string
+                  minLength: 6
+                  format: password
+                  example: secret123
+      responses:
+        "200":
+          description: Login successful — sets `accessToken` and `refreshToken` httpOnly cookies
+          headers:
+            Set-Cookie:
+              description: Sets `accessToken` and `refreshToken` as httpOnly cookies
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/AuthUser"
+              example:
+                success: true
+                message: Login successful
+                data:
+                  id: 550e8400-e29b-41d4-a716-446655440000
+                  username: johndoe
+                  email: john@example.com
+                  role: user
+                  createdAt: "2026-04-26T12:00:00.000Z"
+                  updatedAt: "2026-04-26T12:00:00.000Z"
+                  accessToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                  refreshToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                success: false
+                error:
+                  code: INVALID_CREDENTIALS
+                  message: Invalid email or password
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Billing
+  # ═══════════════════════════════════════════════════════════════════════════
+  /billing/checkout:
+    post:
+      summary: Create a Stripe checkout session
+      operationId: createCheckoutSession
+      tags: [Billing]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [tier]
+              properties:
+                tier:
+                  type: string
+                  enum: [pro, ultra]
+                  example: pro
+      responses:
+        "200":
+          description: Checkout session URL returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                        format: uri
+                        description: Stripe hosted checkout URL
+              example:
+                success: true
+                message: Checkout session created
+                data:
+                  url: https://checkout.stripe.com/pay/cs_test_...
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /billing/portal:
+    post:
+      summary: Create a Stripe billing portal session
+      operationId: createPortalSession
+      tags: [Billing]
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Portal session URL returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                        format: uri
+                        description: Stripe billing portal URL
+              example:
+                success: true
+                message: Portal session created
+                data:
+                  url: https://billing.stripe.com/session/...
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /billing/me:
+    get:
+      summary: Get current user's subscription
+      operationId: getMySubscription
+      tags: [Billing]
+      responses:
+        "200":
+          description: Current subscription info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Subscription"
+              example:
+                success: true
+                message: Current plan
+                data:
+                  tier: free
+                  status: active
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /billing/webhook:
+    post:
+      summary: Stripe webhook receiver
+      operationId: stripeWebhook
+      security: []
+      tags: [Billing]
+      description: |
+        Receives Stripe webhook events. Stripe signature is verified via the
+        `stripe-signature` header. Do not call this endpoint directly.
+
+        **Handled events:**
+        - `checkout.session.completed`
+        - `customer.subscription.created`
+        - `customer.subscription.updated`
+        - `customer.subscription.deleted`
+        - `invoice.payment_failed`
+      parameters:
+        - in: header
+          name: stripe-signature
+          required: true
+          schema:
+            type: string
+          description: Stripe webhook signature for verification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Raw Stripe event payload
+      responses:
+        "200":
+          description: Webhook received
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  received:
+                    type: boolean
+                    enum: [true]
+              example:
+                received: true
+        "400":
+          description: Invalid Stripe webhook signature
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                success: false
+                error:
+                  code: INVALID_WEBHOOK_SIGNATURE
+                  message: Webhook signature verification failed
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Workspaces
+  # ═══════════════════════════════════════════════════════════════════════════
+  /workspaces:
+    post:
+      summary: Create a workspace
+      operationId: createWorkspace
+      tags: [Workspaces]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 255
+                  example: Acme Corp
+      responses:
+        "201":
+          description: Workspace created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Workspace"
+              example:
+                success: true
+                message: Workspace created
+                data:
+                  id: 550e8400-e29b-41d4-a716-446655440000
+                  name: Acme Corp
+                  ownerId: 550e8400-e29b-41d4-a716-446655440001
+                  createdAt: "2026-04-26T12:00:00.000Z"
+                  updatedAt: "2026-04-26T12:00:00.000Z"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "402":
+          $ref: "#/components/responses/PlanLimitExceeded"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+    get:
+      summary: List workspaces the current user belongs to
+      operationId: listWorkspaces
+      tags: [Workspaces]
+      responses:
+        "200":
+          description: List of workspaces with the user's role in each
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/WorkspaceWithRole"
+              example:
+                success: true
+                message: Workspaces
+                data:
+                  - id: 550e8400-e29b-41d4-a716-446655440000
+                    name: Acme Corp
+                    ownerId: 550e8400-e29b-41d4-a716-446655440001
+                    role: owner
+                    createdAt: "2026-04-26T12:00:00.000Z"
+                    updatedAt: "2026-04-26T12:00:00.000Z"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /workspaces/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+        description: Workspace ID
+
+    get:
+      summary: Get a workspace by ID
+      operationId: getWorkspace
+      tags: [Workspaces]
+      responses:
+        "200":
+          description: Workspace details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Workspace"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+    patch:
+      summary: Update a workspace (owner or admin only)
+      operationId: updateWorkspace
+      tags: [Workspaces]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 255
+                  example: Acme Corp (Updated)
+      responses:
+        "200":
+          description: Workspace updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Workspace"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+    delete:
+      summary: Delete a workspace (owner only)
+      operationId: deleteWorkspace
+      tags: [Workspaces]
+      responses:
+        "200":
+          description: Workspace deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    nullable: true
+                    type: object
+              example:
+                success: true
+                message: Workspace deleted
+                data: null
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /workspaces/{id}/members:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+        description: Workspace ID
+
+    get:
+      summary: List workspace members
+      operationId: listWorkspaceMembers
+      tags: [Workspaces]
+      responses:
+        "200":
+          description: List of workspace members
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/WorkspaceMember"
+              example:
+                success: true
+                message: Workspace members
+                data:
+                  - userId: 550e8400-e29b-41d4-a716-446655440001
+                    role: owner
+                    joinedAt: "2026-04-26T12:00:00.000Z"
+                    username: johndoe
+                    email: john@example.com
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /workspaces/{id}/members/{userId}:
+    delete:
+      summary: Remove a member from a workspace (owner or admin only)
+      operationId: removeWorkspaceMember
+      tags: [Workspaces]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+          description: Workspace ID
+        - in: path
+          name: userId
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+          description: User ID to remove
+      responses:
+        "200":
+          description: Member removed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    nullable: true
+                    type: object
+              example:
+                success: true
+                message: Member removed
+                data: null
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Cannot remove the workspace owner
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                success: false
+                error:
+                  code: CANNOT_REMOVE_OWNER
+                  message: Cannot remove the workspace owner
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /workspaces/{id}/invitations:
+    post:
+      summary: Invite a user to a workspace (owner or admin only)
+      operationId: inviteToWorkspace
+      tags: [Workspaces]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+          description: Workspace ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: jane@example.com
+                role:
+                  $ref: "#/components/schemas/ProjectRole"
+                  default: member
+      responses:
+        "201":
+          description: Invitation sent (expires in 7 days)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Invitation"
+              example:
+                success: true
+                message: Invitation sent
+                data:
+                  id: 550e8400-e29b-41d4-a716-446655440000
+                  token: a3f8c2d1e4b5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1
+                  email: jane@example.com
+                  scope: workspace
+                  workspaceId: 550e8400-e29b-41d4-a716-446655440001
+                  projectId: null
+                  role: member
+                  invitedById: 550e8400-e29b-41d4-a716-446655440002
+                  status: pending
+                  expiresAt: "2026-05-03T12:00:00.000Z"
+                  acceptedAt: null
+                  createdAt: "2026-04-26T12:00:00.000Z"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "402":
+          $ref: "#/components/responses/PlanLimitExceeded"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Projects
+  # ═══════════════════════════════════════════════════════════════════════════
+  /workspaces/{workspaceId}/projects:
+    parameters:
+      - in: path
+        name: workspaceId
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+        description: Workspace ID
+
+    post:
+      summary: Create a project in a workspace
+      operationId: createProject
+      tags: [Projects]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 255
+                  example: Backend Rewrite
+                description:
+                  type: string
+                  maxLength: 10000
+                  example: Migrate from Express to Fastify v5
+      responses:
+        "201":
+          description: Project created (creator is automatically added as admin)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Project"
+              example:
+                success: true
+                message: Project created
+                data:
+                  id: 550e8400-e29b-41d4-a716-446655440000
+                  workspaceId: 550e8400-e29b-41d4-a716-446655440001
+                  name: Backend Rewrite
+                  description: Migrate from Express to Fastify v5
+                  createdById: 550e8400-e29b-41d4-a716-446655440002
+                  createdAt: "2026-04-26T12:00:00.000Z"
+                  updatedAt: "2026-04-26T12:00:00.000Z"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "402":
+          $ref: "#/components/responses/PlanLimitExceeded"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+    get:
+      summary: List all projects in a workspace
+      operationId: listProjects
+      tags: [Projects]
+      responses:
+        "200":
+          description: List of projects
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Project"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /projects/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+        description: Project ID
+
+    get:
+      summary: Get a project by ID
+      operationId: getProject
+      tags: [Projects]
+      responses:
+        "200":
+          description: Project details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Project"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+    patch:
+      summary: Update a project (project admin only)
+      operationId: updateProject
+      tags: [Projects]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 255
+                description:
+                  type: string
+                  maxLength: 10000
+      responses:
+        "200":
+          description: Project updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Project"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+    delete:
+      summary: Delete a project (project admin or workspace owner)
+      operationId: deleteProject
+      tags: [Projects]
+      responses:
+        "200":
+          description: Project deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    nullable: true
+                    type: object
+              example:
+                success: true
+                message: Project deleted
+                data: null
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /projects/{id}/members:
+    get:
+      summary: List project members
+      operationId: listProjectMembers
+      tags: [Projects]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+          description: Project ID
+      responses:
+        "200":
+          description: List of project members
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ProjectMember"
+              example:
+                success: true
+                message: Project members
+                data:
+                  - userId: 550e8400-e29b-41d4-a716-446655440001
+                    role: admin
+                    joinedAt: "2026-04-26T12:00:00.000Z"
+                    username: johndoe
+                    email: john@example.com
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /projects/{id}/invitations:
+    post:
+      summary: Invite a user to a project (project admin only)
+      operationId: inviteToProject
+      tags: [Projects]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+          description: Project ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: jane@example.com
+                  description: Must already be a workspace member
+                role:
+                  $ref: "#/components/schemas/ProjectRole"
+                  default: member
+      responses:
+        "201":
+          description: Invitation sent (expires in 7 days). Invitee must already be a workspace member.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Invitation"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Tasks
+  # ═══════════════════════════════════════════════════════════════════════════
+  /projects/{projectId}/tasks:
+    parameters:
+      - in: path
+        name: projectId
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+        description: Project ID
+
+    post:
+      summary: Create a task in a project
+      operationId: createTask
+      tags: [Tasks]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title:
+                  type: string
+                  minLength: 1
+                  maxLength: 255
+                  example: Fix login bug
+                description:
+                  type: string
+                  maxLength: 10000
+                  example: Users cannot login with Google OAuth
+                status:
+                  $ref: "#/components/schemas/TaskStatus"
+                  default: todo
+                assigneeId:
+                  $ref: "#/components/schemas/UUID"
+                  description: Must be an existing project member
+      responses:
+        "201":
+          description: Task created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Task"
+              example:
+                success: true
+                message: Task created
+                data:
+                  id: 550e8400-e29b-41d4-a716-446655440000
+                  projectId: 550e8400-e29b-41d4-a716-446655440001
+                  title: Fix login bug
+                  description: Users cannot login with Google OAuth
+                  status: todo
+                  assigneeId: null
+                  createdById: 550e8400-e29b-41d4-a716-446655440002
+                  createdAt: "2026-04-26T12:00:00.000Z"
+                  updatedAt: "2026-04-26T12:00:00.000Z"
+        "400":
+          description: Bad request or invalid assignee
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                badRequest:
+                  summary: Validation error
+                  value:
+                    success: false
+                    error:
+                      code: BAD_REQUEST
+                      message: Invalid input
+                invalidAssignee:
+                  summary: Assignee is not a project member
+                  value:
+                    success: false
+                    error:
+                      code: INVALID_ASSIGNEE
+                      message: Assignee is not a member of this project
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+    get:
+      summary: List all tasks in a project
+      operationId: listTasks
+      tags: [Tasks]
+      responses:
+        "200":
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Task"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /tasks/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+        description: Task ID
+
+    get:
+      summary: Get a task by ID
+      operationId: getTask
+      tags: [Tasks]
+      responses:
+        "200":
+          description: Task details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Task"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+    patch:
+      summary: Update a task (project members only)
+      operationId: updateTask
+      tags: [Tasks]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  minLength: 1
+                  maxLength: 255
+                description:
+                  type: string
+                  maxLength: 10000
+                status:
+                  $ref: "#/components/schemas/TaskStatus"
+                assigneeId:
+                  $ref: "#/components/schemas/UUID"
+                  nullable: true
+                  description: Set to null to unassign; must be a project member if provided
+      responses:
+        "200":
+          description: Task updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Task"
+        "400":
+          description: Validation error or invalid assignee
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+    delete:
+      summary: Delete a task (task creator or project admin only)
+      operationId: deleteTask
+      tags: [Tasks]
+      responses:
+        "200":
+          description: Task deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    nullable: true
+                    type: object
+              example:
+                success: true
+                message: Task deleted
+                data: null
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Invitations
+  # ═══════════════════════════════════════════════════════════════════════════
+  /invitations/{token}:
+    get:
+      summary: Preview an invitation by token
+      operationId: previewInvitation
+      tags: [Invitations]
+      parameters:
+        - in: path
+          name: token
+          required: true
+          schema:
+            type: string
+          description: 64-character hex invitation token
+      responses:
+        "200":
+          description: Invitation preview details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/InvitationPreview"
+              example:
+                success: true
+                message: Invitation
+                data:
+                  scope: workspace
+                  role: member
+                  resourceName: Acme Corp
+                  inviterUsername: johndoe
+                  email: jane@example.com
+                  status: pending
+                  expiresAt: "2026-05-03T12:00:00.000Z"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "410":
+          description: Invitation has expired or was revoked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                success: false
+                error:
+                  code: INVITATION_EXPIRED
+                  message: This invitation has expired
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /invitations/{token}/accept:
+    post:
+      summary: Accept an invitation
+      operationId: acceptInvitation
+      tags: [Invitations]
+      parameters:
+        - in: path
+          name: token
+          required: true
+          schema:
+            type: string
+          description: 64-character hex invitation token
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Invitation accepted — user is added to the workspace/project
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Invitation"
+              example:
+                success: true
+                message: Invitation accepted
+                data:
+                  id: 550e8400-e29b-41d4-a716-446655440000
+                  token: a3f8c2d1...
+                  email: jane@example.com
+                  scope: workspace
+                  workspaceId: 550e8400-e29b-41d4-a716-446655440001
+                  projectId: null
+                  role: member
+                  invitedById: 550e8400-e29b-41d4-a716-446655440002
+                  status: accepted
+                  expiresAt: "2026-05-03T12:00:00.000Z"
+                  acceptedAt: "2026-04-26T14:00:00.000Z"
+                  createdAt: "2026-04-26T12:00:00.000Z"
+        "400":
+          description: Invitation is not pending or has expired
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                notPending:
+                  summary: Invitation already used or revoked
+                  value:
+                    success: false
+                    error:
+                      code: INVITATION_NOT_PENDING
+                      message: This invitation is no longer valid
+                expired:
+                  summary: Invitation expired
+                  value:
+                    success: false
+                    error:
+                      code: INVITATION_EXPIRED
+                      message: This invitation has expired
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Logged-in user's email does not match the invitation email
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                success: false
+                error:
+                  code: FORBIDDEN
+                  message: This invitation was sent to a different email address
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /invitations/{id}/revoke:
+    post:
+      summary: Revoke a pending invitation
+      operationId: revokeInvitation
+      tags: [Invitations]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+          description: Invitation ID (UUID, not token)
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Invitation revoked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  message:
+                    type: string
+                  data:
+                    nullable: true
+                    type: object
+              example:
+                success: true
+                message: Invitation revoked
+                data: null
+        "400":
+          description: Invitation is not in pending state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                success: false
+                error:
+                  code: INVITATION_NOT_PENDING
+                  message: Only pending invitations can be revoked
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
