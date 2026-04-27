@@ -379,7 +379,12 @@ function BrandLogo() {
 }
 
 function KanbanMockup() {
-	const cols: { label: string; count: number; active?: boolean; cards: { title: string; tag: string; pct?: number }[] }[] = [
+	const cols: {
+		label: string;
+		count: number;
+		active?: boolean;
+		cards: { title: string; tag: string; pct?: number }[];
+	}[] = [
 		{
 			label: 'Backlog',
 			count: 3,
@@ -443,7 +448,7 @@ function KanbanMockup() {
 										</span>
 										{card.pct != null && (
 											<div className='flex items-center gap-1'>
-												<div className='w-10 h-[3px] rounded-full bg-border overflow-hidden'>
+												<div className='w-10 h-0.75 rounded-full bg-border overflow-hidden'>
 													<div
 														className='h-full rounded-full bg-foreground/50'
 														style={{ width: `${card.pct}%` }}
