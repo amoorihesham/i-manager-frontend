@@ -9,4 +9,8 @@ coverage
 .env.*
 package-lock.json
 pnpm-lock.yaml
+.cloud
+.specify
+.husky
+.github
 *md
