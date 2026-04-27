@@ -32,10 +32,7 @@ export function WorkspaceMembersView({ workspaceId }: WorkspaceMembersViewProps)
 	}, [workspaceId]);
 
 	useEffect(() => {
-		Promise.all([
-			api.workspaces.listWorkspaces(),
-			api.workspaces.listWorkspaceMembers(workspaceId),
-		])
+		Promise.all([api.workspaces.listWorkspaces(), api.workspaces.listWorkspaceMembers(workspaceId)])
 			.then(([listRes, membersRes]) => {
 				const ws = listRes.data.find((w) => w.id === workspaceId);
 				setUserRole(ws?.role ?? null);
@@ -60,7 +57,10 @@ export function WorkspaceMembersView({ workspaceId }: WorkspaceMembersViewProps)
 			<main className='container max-w-3xl mx-auto px-6 py-8 space-y-4'>
 				<Skeleton className='h-8 w-32' />
 				{Array.from({ length: 3 }).map((_, i) => (
-					<Skeleton key={i} className='h-12 rounded-lg' />
+					<Skeleton
+						key={i}
+						className='h-12 rounded-lg'
+					/>
 				))}
 			</main>
 		);
@@ -69,7 +69,9 @@ export function WorkspaceMembersView({ workspaceId }: WorkspaceMembersViewProps)
 	if (error) {
 		return (
 			<main className='container max-w-3xl mx-auto px-6 py-8'>
-				<p role='alert' className='text-sm text-destructive'>
+				<p
+					role='alert'
+					className='text-sm text-destructive'>
 					{error}
 				</p>
 			</main>
@@ -90,7 +92,10 @@ export function WorkspaceMembersView({ workspaceId }: WorkspaceMembersViewProps)
 			{(userRole === 'owner' || userRole === 'admin') && (
 				<>
 					<section className='mb-6'>
-						<InviteMemberForm workspaceId={workspaceId} onInviteSent={handleMemberChange} />
+						<InviteMemberForm
+							workspaceId={workspaceId}
+							onInviteSent={handleMemberChange}
+						/>
 					</section>
 					<Separator className='mb-6' />
 				</>
@@ -101,9 +106,7 @@ export function WorkspaceMembersView({ workspaceId }: WorkspaceMembersViewProps)
 					const isSelf = currentUserId !== null && member.userId === currentUserId;
 					const isOwnerRow = member.role === 'owner';
 					const canRemove =
-						!isSelf &&
-						(userRole === 'owner' || userRole === 'admin') &&
-						!(isOwnerRow && userRole !== 'owner');
+						!isSelf && (userRole === 'owner' || userRole === 'admin') && !(isOwnerRow && userRole !== 'owner');
 
 					return (
 						<li
@@ -112,7 +115,9 @@ export function WorkspaceMembersView({ workspaceId }: WorkspaceMembersViewProps)
 							<div className='flex flex-col gap-0.5'>
 								<div className='flex items-center gap-2'>
 									<span className='text-sm font-medium'>{member.username}</span>
-									<Badge variant='secondary' className='capitalize text-xs'>
+									<Badge
+										variant='secondary'
+										className='capitalize text-xs'>
 										{member.role}
 									</Badge>
 								</div>

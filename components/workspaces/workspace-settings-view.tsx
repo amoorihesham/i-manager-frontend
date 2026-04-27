@@ -20,10 +20,7 @@ export function WorkspaceSettingsView({ workspaceId }: WorkspaceSettingsViewProp
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		Promise.all([
-			api.workspaces.getWorkspace(workspaceId),
-			api.workspaces.listWorkspaces(),
-		])
+		Promise.all([api.workspaces.getWorkspace(workspaceId), api.workspaces.listWorkspaces()])
 			.then(([wsRes, listRes]) => {
 				setWorkspaceName(wsRes.data.name);
 				const membership = listRes.data.find((ws) => ws.id === workspaceId);
@@ -49,7 +46,9 @@ export function WorkspaceSettingsView({ workspaceId }: WorkspaceSettingsViewProp
 	if (error || !workspaceName) {
 		return (
 			<main className='container max-w-2xl mx-auto px-6 py-8'>
-				<p role='alert' className='text-sm text-destructive'>
+				<p
+					role='alert'
+					className='text-sm text-destructive'>
 					{error ?? 'Workspace not found.'}
 				</p>
 			</main>
@@ -86,7 +85,10 @@ export function WorkspaceSettingsView({ workspaceId }: WorkspaceSettingsViewProp
 						<p className='text-sm text-muted-foreground'>
 							Once deleted, this workspace and all its data will be permanently removed.
 						</p>
-						<DeleteWorkspaceDialog workspaceId={workspaceId} workspaceName={workspaceName} />
+						<DeleteWorkspaceDialog
+							workspaceId={workspaceId}
+							workspaceName={workspaceName}
+						/>
 					</section>
 				</>
 			)}

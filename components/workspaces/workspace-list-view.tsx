@@ -38,7 +38,10 @@ export function WorkspaceListView() {
 		return (
 			<div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
 				{Array.from({ length: 3 }).map((_, i) => (
-					<Skeleton key={i} className='h-24 rounded-lg' />
+					<Skeleton
+						key={i}
+						className='h-24 rounded-lg'
+					/>
 				))}
 			</div>
 		);
@@ -50,7 +53,10 @@ export function WorkspaceListView() {
 				role='alert'
 				className='rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive flex items-center justify-between'>
 				<span>{error}</span>
-				<Button variant='ghost' size='sm' onClick={handleRetry}>
+				<Button
+					variant='ghost'
+					size='sm'
+					onClick={handleRetry}>
 					Retry
 				</Button>
 			</div>
@@ -71,13 +77,18 @@ export function WorkspaceListView() {
 	return (
 		<div className='space-y-4'>
 			<div className='flex justify-end'>
-				<Button asChild size='sm'>
+				<Button
+					asChild
+					size='sm'>
 					<Link href='/workspaces/new'>New Workspace</Link>
 				</Button>
 			</div>
 			<div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
 				{workspaces.map((ws) => (
-					<WorkspaceCard key={ws.id} workspace={ws} />
+					<WorkspaceCard
+						key={ws.id}
+						workspace={ws}
+					/>
 				))}
 			</div>
 		</div>

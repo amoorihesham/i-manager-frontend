@@ -10,11 +10,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 	const [isChecking, setIsChecking] = useState(true);
 
 	useEffect(() => {
-		api.workspaces.listWorkspaces().catch(() => {
-			router.push('/login');
-		}).finally(() => {
-			setIsChecking(false);
-		});
+		api.workspaces
+			.listWorkspaces()
+			.catch(() => {
+				router.push('/login');
+			})
+			.finally(() => {
+				setIsChecking(false);
+			});
 	}, [router]);
 
 	if (isChecking) {
@@ -26,7 +29,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 			<header className='border-b px-6 py-3 flex items-center gap-6'>
 				<span className='font-semibold text-sm tracking-tight'>iManager</span>
 				<nav>
-					<Link href='/workspaces' className='text-sm text-muted-foreground hover:text-foreground transition-colors'>
+					<Link
+						href='/workspaces'
+						className='text-sm text-muted-foreground hover:text-foreground transition-colors'>
 						Workspaces
 					</Link>
 				</nav>

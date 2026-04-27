@@ -5,13 +5,7 @@ import { useForm } from '@tanstack/react-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import * as api from '@/lib/api';
 import { InviteMemberSchema } from '@/lib/workspaces/schemas';
 import { toast } from 'sonner';
@@ -96,7 +90,9 @@ export function InviteMemberForm({ workspaceId, onInviteSent }: InviteMemberForm
 							<Select
 								value={field.state.value}
 								onValueChange={(v) => field.handleChange(v as 'admin' | 'member')}>
-								<SelectTrigger id='invite-role' className='w-32'>
+								<SelectTrigger
+									id='invite-role'
+									className='w-32'>
 									<SelectValue />
 								</SelectTrigger>
 								<SelectContent>
@@ -108,7 +104,11 @@ export function InviteMemberForm({ workspaceId, onInviteSent }: InviteMemberForm
 					)}
 				</form.Field>
 
-				<Button type='submit' size='sm' disabled={form.state.isSubmitting} className='mb-0.5'>
+				<Button
+					type='submit'
+					size='sm'
+					disabled={form.state.isSubmitting}
+					className='mb-0.5'>
 					{form.state.isSubmitting ? 'Inviting…' : 'Invite'}
 				</Button>
 			</div>

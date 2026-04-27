@@ -46,7 +46,9 @@ export function WorkspaceDashboardView({ workspaceId }: WorkspaceDashboardViewPr
 	if (error || !workspace) {
 		return (
 			<main className='container max-w-5xl mx-auto px-6 py-8'>
-				<p role='alert' className='text-sm text-destructive'>
+				<p
+					role='alert'
+					className='text-sm text-destructive'>
 					{error ?? 'Workspace not found.'}
 				</p>
 			</main>
@@ -57,7 +59,9 @@ export function WorkspaceDashboardView({ workspaceId }: WorkspaceDashboardViewPr
 		<main className='container max-w-5xl mx-auto px-6 py-8'>
 			<div className='flex items-center gap-3 mb-6'>
 				<h1 className='text-2xl font-semibold'>{workspace.name}</h1>
-				<Badge variant='secondary' className='capitalize'>
+				<Badge
+					variant='secondary'
+					className='capitalize'>
 					{workspace.role}
 				</Badge>
 			</div>

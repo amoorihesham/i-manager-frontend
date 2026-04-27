@@ -42,7 +42,9 @@ export function DeleteWorkspaceDialog({ workspaceId, workspaceName }: DeleteWork
 	return (
 		<AlertDialog>
 			<AlertDialogTrigger asChild>
-				<Button variant='destructive' size='sm'>
+				<Button
+					variant='destructive'
+					size='sm'>
 					Delete workspace
 				</Button>
 			</AlertDialogTrigger>
@@ -55,7 +57,9 @@ export function DeleteWorkspaceDialog({ workspaceId, workspaceName }: DeleteWork
 				</AlertDialogHeader>
 				<AlertDialogFooter>
 					<AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
-					<AlertDialogAction onClick={handleDelete} disabled={isPending}>
+					<AlertDialogAction
+						onClick={handleDelete}
+						disabled={isPending}>
 						{isPending ? 'Deleting…' : 'Delete'}
 					</AlertDialogAction>
 				</AlertDialogFooter>

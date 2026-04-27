@@ -43,20 +43,23 @@ export function RemoveMemberButton({ workspaceId, userId, username, onRemoved }:
 	return (
 		<AlertDialog>
 			<AlertDialogTrigger asChild>
-				<Button variant='ghost' size='icon' aria-label={`Remove ${username}`}>
+				<Button
+					variant='ghost'
+					size='icon'
+					aria-label={`Remove ${username}`}>
 					<UserMinus className='h-4 w-4' />
 				</Button>
 			</AlertDialogTrigger>
 			<AlertDialogContent>
 				<AlertDialogHeader>
 					<AlertDialogTitle>Remove member</AlertDialogTitle>
-					<AlertDialogDescription>
-						Remove {username} from this workspace?
-					</AlertDialogDescription>
+					<AlertDialogDescription>Remove {username} from this workspace?</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
 					<AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
-					<AlertDialogAction onClick={handleRemove} disabled={isPending}>
+					<AlertDialogAction
+						onClick={handleRemove}
+						disabled={isPending}>
 						{isPending ? 'Removing…' : 'Remove'}
 					</AlertDialogAction>
 				</AlertDialogFooter>

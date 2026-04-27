@@ -13,7 +13,9 @@ export function WorkspaceCard({ workspace }: WorkspaceCardProps) {
 		<div className='rounded-lg border p-4 flex flex-col gap-3'>
 			<div className='flex items-start justify-between gap-2'>
 				<h2 className='font-medium text-sm'>{workspace.name}</h2>
-				<Badge variant='secondary' className='capitalize text-xs'>
+				<Badge
+					variant='secondary'
+					className='capitalize text-xs'>
 					{workspace.role}
 				</Badge>
 			</div>
