@@ -7,24 +7,24 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import * as api from '@/lib/api';
-import { LoginSchema } from '@/lib/auth/schemas';
+import { CreateWorkspaceSchema } from '@/lib/workspaces/schemas';
 import { toast } from 'sonner';
 
-export function LoginForm() {
+export function CreateWorkspaceForm() {
 	const router = useRouter();
 	const [serverError, setServerError] = useState<string | null>(null);
 
 	const form = useForm({
-		defaultValues: { email: '', password: '' },
+		defaultValues: { name: '' },
 		validators: {
-			onSubmit: LoginSchema,
+			onSubmit: CreateWorkspaceSchema,
 		},
 		onSubmit: async ({ value }) => {
 			setServerError(null);
 			try {
-				const { message } = await api.auth.login(value);
-				toast.success(message);
-				router.push('/workspaces');
+				const result = await api.workspaces.createWorkspace({ name: value.name });
+				toast.success(result.message);
+				router.push('/workspaces/' + result.data.id);
 			} catch (err) {
 				const apiErr = err as api.ApiError;
 				setServerError(apiErr?.error?.message ?? 'Something went wrong. Please try again.');
@@ -48,56 +48,28 @@ export function LoginForm() {
 			)}
 
 			<div className='space-y-4'>
-				<form.Field name='email'>
+				<form.Field name='name'>
 					{(field) => (
 						<div className='space-y-1.5'>
-							<Label htmlFor={field.name}>Email</Label>
+							<Label htmlFor={field.name}>Workspace name</Label>
 							<Input
 								id={field.name}
 								name={field.name}
-								type='email'
-								autoComplete='email'
-								placeholder='you@example.com'
+								type='text'
+								placeholder='My workspace'
 								aria-invalid={field.state.meta.isTouched && field.state.meta.errors.length > 0}
+								aria-describedby={field.state.meta.errors.length > 0 ? `${field.name}-error` : undefined}
 								value={field.state.value}
 								onChange={(e) => field.handleChange(e.target.value)}
 								onBlur={field.handleBlur}
 							/>
-							{field.state.meta.errors &&
-								field.state.meta.errors.map((e) => (
-									<p
-										className='text-xs text-destructive'
-										key={e?.message}>
-										{e?.message}
-									</p>
-								))}
-						</div>
-					)}
-				</form.Field>
-
-				<form.Field name='password'>
-					{(field) => (
-						<div className='space-y-1.5'>
-							<Label htmlFor={field.name}>Password</Label>
-							<Input
-								id={field.name}
-								name={field.name}
-								type='password'
-								autoComplete='current-password'
-								placeholder='••••••••'
-								aria-invalid={field.state.meta.isTouched && field.state.meta.errors.length > 0}
-								value={field.state.value}
-								onChange={(e) => field.handleChange(e.target.value)}
-								onBlur={field.handleBlur}
-							/>
-							{field.state.meta.errors &&
-								field.state.meta.errors.map((e) => (
-									<p
-										className='text-xs text-destructive'
-										key={e?.message}>
-										{e?.message}
-									</p>
-								))}
+							{field.state.meta.errors && field.state.meta.errors.length > 0 && (
+								<p
+									id={`${field.name}-error`}
+									className='text-xs text-destructive'>
+									{field.state.meta.errors[0]?.message}
+								</p>
+							)}
 						</div>
 					)}
 				</form.Field>
@@ -108,7 +80,7 @@ export function LoginForm() {
 				size='lg'
 				className='mt-6 w-full'
 				disabled={form.state.isSubmitting}>
-				{form.state.isSubmitting ? 'Signing in…' : 'Sign in'}
+				{form.state.isSubmitting ? 'Creating…' : 'Create workspace'}
 			</Button>
 		</form>
 	);

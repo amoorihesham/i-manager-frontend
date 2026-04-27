@@ -31,9 +31,9 @@ testing. Each story is independently deliverable.
 
 **Purpose**: Project scaffolding and dependencies needed before any user story can start.
 
-- [ ] T001 Install missing Shadcn components: `pnpm dlx shadcn@latest add alert-dialog badge dialog select separator skeleton`
-- [ ] T002 [P] Create `lib/workspaces/schemas.ts` with `CreateWorkspaceSchema`, `RenameWorkspaceSchema`, and `InviteMemberSchema` Zod schemas (see data-model.md for field rules)
-- [ ] T003 [P] Create directory structure: `app/(app)/workspaces/`, `app/(app)/workspaces/new/`, `app/(app)/workspaces/[id]/`, `app/(app)/workspaces/[id]/settings/`, `app/(app)/workspaces/[id]/members/`, `components/workspaces/`
+- [X] T001 Install missing Shadcn components: `pnpm dlx shadcn@latest add alert-dialog badge dialog select separator skeleton`
+- [X] T002 [P] Create `lib/workspaces/schemas.ts` with `CreateWorkspaceSchema`, `RenameWorkspaceSchema`, and `InviteMemberSchema` Zod schemas (see data-model.md for field rules)
+- [X] T003 [P] Create directory structure: `app/(app)/workspaces/`, `app/(app)/workspaces/new/`, `app/(app)/workspaces/[id]/`, `app/(app)/workspaces/[id]/settings/`, `app/(app)/workspaces/[id]/members/`, `components/workspaces/`
 
 ---
 
@@ -44,8 +44,8 @@ page can be rendered. No user story work can begin until this phase is complete.
 
 **⚠️ CRITICAL**: All user story pages live under `app/(app)/` — this layout is a hard dependency.
 
-- [ ] T004 Create `app/(app)/layout.tsx` as a Client Component that checks authentication via `api.workspaces.listWorkspaces()` on mount and redirects to `/login` if unauthenticated; renders children inside a minimal app chrome (top nav with iManager logo and Workspaces link) while authenticated
-- [ ] T005 Update `components/auth/login-form.tsx`: change `router.push('/')` to `router.push('/workspaces')` so authenticated users land on the workspace list after login
+- [X] T004 Create `app/(app)/layout.tsx` as a Client Component that checks authentication via `api.workspaces.listWorkspaces()` on mount and redirects to `/login` if unauthenticated; renders children inside a minimal app chrome (top nav with iManager logo and Workspaces link) while authenticated
+- [X] T005 Update `components/auth/login-form.tsx`: change `router.push('/')` to `router.push('/workspaces')` so authenticated users land on the workspace list after login
 
 **Checkpoint**: Foundation ready — open `/login`, sign in, confirm redirect to `/workspaces` (404 is expected until Phase 3). Sign out and confirm visiting `/workspaces` redirects back to `/login`.
 
@@ -59,10 +59,10 @@ page can be rendered. No user story work can begin until this phase is complete.
 
 ### Implementation for User Story 1
 
-- [ ] T006 [P] [US1] Create `components/workspaces/workspace-card.tsx` — Client Component that receives `WorkspaceWithRole`, renders workspace name as heading, role Badge, and an "Open" link to `/workspaces/[id]`
-- [ ] T007 [P] [US1] Create `components/workspaces/workspace-list-view.tsx` — Client Component that calls `api.workspaces.listWorkspaces()` on mount, manages `workspaces`, `isLoading`, and `error` state; renders Skeleton while loading, inline error banner with retry on failure, empty-state with link to `/workspaces/new` when list is empty, or grid of `<WorkspaceCard />` with a "New Workspace" button linking to `/workspaces/new`
-- [ ] T008 [US1] Create `app/(app)/workspaces/page.tsx` — Server Component that exports `metadata` (`title: 'Workspaces — iManager'`, `robots: 'noindex'`) and renders `<main>` with `<h1>Workspaces</h1>` and `<WorkspaceListView />` (depends on T007)
-- [ ] T009 [US1] Create `app/(app)/workspaces/[id]/page.tsx` — Server Component that exports `metadata` (`title: 'Workspace — iManager'`, `robots: 'noindex'`) and renders a Client Component view that calls `api.workspaces.listWorkspaces()` to find the workspace by `params.id`, shows workspace name as `<h1>`, user's role Badge, and navigation links to Settings and Members; shows error/skeleton as appropriate
+- [X] T006 [P] [US1] Create `components/workspaces/workspace-card.tsx` — Client Component that receives `WorkspaceWithRole`, renders workspace name as heading, role Badge, and an "Open" link to `/workspaces/[id]`
+- [X] T007 [P] [US1] Create `components/workspaces/workspace-list-view.tsx` — Client Component that calls `api.workspaces.listWorkspaces()` on mount, manages `workspaces`, `isLoading`, and `error` state; renders Skeleton while loading, inline error banner with retry on failure, empty-state with link to `/workspaces/new` when list is empty, or grid of `<WorkspaceCard />` with a "New Workspace" button linking to `/workspaces/new`
+- [X] T008 [US1] Create `app/(app)/workspaces/page.tsx` — Server Component that exports `metadata` (`title: 'Workspaces — iManager'`, `robots: 'noindex'`) and renders `<main>` with `<h1>Workspaces</h1>` and `<WorkspaceListView />` (depends on T007)
+- [X] T009 [US1] Create `app/(app)/workspaces/[id]/page.tsx` — Server Component that exports `metadata` (`title: 'Workspace — iManager'`, `robots: 'noindex'`) and renders a Client Component view that calls `api.workspaces.listWorkspaces()` to find the workspace by `params.id`, shows workspace name as `<h1>`, user's role Badge, and navigation links to Settings and Members; shows error/skeleton as appropriate
 
 **Checkpoint**: US1 fully functional — workspace list and workspace dashboard pages work independently.
 
@@ -76,8 +76,8 @@ page can be rendered. No user story work can begin until this phase is complete.
 
 ### Implementation for User Story 2
 
-- [ ] T010 [US2] Create `components/workspaces/create-workspace-form.tsx` — Client Component using TanStack Form with `CreateWorkspaceSchema` (from `lib/workspaces/schemas.ts`); renders a `name` Input + Label + inline validation error; shows server error banner above submit; calls `api.workspaces.createWorkspace({ name })` on submit; on success calls `toast.success(result.message)` and `router.push('/workspaces/' + result.data.id)`; submit button disabled while `form.state.isSubmitting`
-- [ ] T011 [US2] Create `app/(app)/workspaces/new/page.tsx` — Server Component that exports `metadata` (`title: 'New Workspace — iManager'`, `robots: 'noindex'`) and renders `<main>` with `<h1>New Workspace</h1>`, `<CreateWorkspaceForm />`, and a "Cancel" link back to `/workspaces` (depends on T010)
+- [X] T010 [US2] Create `components/workspaces/create-workspace-form.tsx` — Client Component using TanStack Form with `CreateWorkspaceSchema` (from `lib/workspaces/schemas.ts`); renders a `name` Input + Label + inline validation error; shows server error banner above submit; calls `api.workspaces.createWorkspace({ name })` on submit; on success calls `toast.success(result.message)` and `router.push('/workspaces/' + result.data.id)`; submit button disabled while `form.state.isSubmitting`
+- [X] T011 [US2] Create `app/(app)/workspaces/new/page.tsx` — Server Component that exports `metadata` (`title: 'New Workspace — iManager'`, `robots: 'noindex'`) and renders `<main>` with `<h1>New Workspace</h1>`, `<CreateWorkspaceForm />`, and a "Cancel" link back to `/workspaces` (depends on T010)
 
 **Checkpoint**: US2 fully functional — create workspace flow works independently of settings and member flows.
 
@@ -91,10 +91,10 @@ page can be rendered. No user story work can begin until this phase is complete.
 
 ### Implementation for User Story 3
 
-- [ ] T012 [P] [US3] Create `components/workspaces/rename-workspace-form.tsx` — Client Component using TanStack Form with `RenameWorkspaceSchema`; accepts props `workspaceId: string`, `currentName: string`, `onSuccess: (newName: string) => void`; renders name Input pre-filled with `currentName`; calls `api.workspaces.updateWorkspace(workspaceId, { name })` on submit; on success calls `onSuccess(name)` and `toast.success`; shows server error banner on failure; submit button disabled while submitting
-- [ ] T013 [P] [US3] Create `components/workspaces/delete-workspace-dialog.tsx` — Client Component using Shadcn AlertDialog; accepts props `workspaceId: string`, `workspaceName: string`; trigger button labelled "Delete workspace"; dialog body shows "Are you sure you want to delete [workspaceName]? This cannot be undone."; confirm button calls `api.workspaces.deleteWorkspace(workspaceId)`, on success `toast.success` and `router.push('/workspaces')`, on error `toast.error`; manages `isPending` state to disable confirm button during request
-- [ ] T014 [US3] Create `components/workspaces/workspace-settings-view.tsx` — Client Component; accepts `workspaceId: string` prop; fetches workspace via `api.workspaces.getWorkspace(workspaceId)` and derives `userRole` via `api.workspaces.listWorkspaces()` on mount; renders Skeleton while loading; renders `<h1>` with workspace name, Back link to `/workspaces/[id]`; conditionally renders `<RenameWorkspaceForm />` when `userRole` is `'owner'` or `'admin'`; conditionally renders `<DeleteWorkspaceDialog />` only when `userRole === 'owner'` (depends on T012, T013)
-- [ ] T015 [US3] Create `app/(app)/workspaces/[id]/settings/page.tsx` — Server Component that exports `metadata` (`title: 'Workspace Settings — iManager'`, `robots: 'noindex'`) and renders `<WorkspaceSettingsView workspaceId={params.id} />` (depends on T014)
+- [X] T012 [P] [US3] Create `components/workspaces/rename-workspace-form.tsx` — Client Component using TanStack Form with `RenameWorkspaceSchema`; accepts props `workspaceId: string`, `currentName: string`, `onSuccess: (newName: string) => void`; renders name Input pre-filled with `currentName`; calls `api.workspaces.updateWorkspace(workspaceId, { name })` on submit; on success calls `onSuccess(name)` and `toast.success`; shows server error banner on failure; submit button disabled while submitting
+- [X] T013 [P] [US3] Create `components/workspaces/delete-workspace-dialog.tsx` — Client Component using Shadcn AlertDialog; accepts props `workspaceId: string`, `workspaceName: string`; trigger button labelled "Delete workspace"; dialog body shows "Are you sure you want to delete [workspaceName]? This cannot be undone."; confirm button calls `api.workspaces.deleteWorkspace(workspaceId)`, on success `toast.success` and `router.push('/workspaces')`, on error `toast.error`; manages `isPending` state to disable confirm button during request
+- [X] T014 [US3] Create `components/workspaces/workspace-settings-view.tsx` — Client Component; accepts `workspaceId: string` prop; fetches workspace via `api.workspaces.getWorkspace(workspaceId)` and derives `userRole` via `api.workspaces.listWorkspaces()` on mount; renders Skeleton while loading; renders `<h1>` with workspace name, Back link to `/workspaces/[id]`; conditionally renders `<RenameWorkspaceForm />` when `userRole` is `'owner'` or `'admin'`; conditionally renders `<DeleteWorkspaceDialog />` only when `userRole === 'owner'` (depends on T012, T013)
+- [X] T015 [US3] Create `app/(app)/workspaces/[id]/settings/page.tsx` — Server Component that exports `metadata` (`title: 'Workspace Settings — iManager'`, `robots: 'noindex'`) and renders `<WorkspaceSettingsView workspaceId={params.id} />` (depends on T014)
 
 **Checkpoint**: US3 fully functional — settings page works independently; role gating verified for all three roles.
 
@@ -108,10 +108,10 @@ page can be rendered. No user story work can begin until this phase is complete.
 
 ### Implementation for User Story 4
 
-- [ ] T016 [P] [US4] Create `components/workspaces/invite-member-form.tsx` — Client Component using TanStack Form with `InviteMemberSchema`; accepts props `workspaceId: string`, `onInviteSent: () => void`; renders email Input + Shadcn Select for role (options: member, admin; default member) + Submit button; calls `api.workspaces.inviteToWorkspace(workspaceId, { email, role })` on submit; on success resets form, calls `onInviteSent()`, and `toast.success`; shows server error banner on failure; submit disabled while submitting
-- [ ] T017 [P] [US4] Create `components/workspaces/remove-member-button.tsx` — Client Component using Shadcn AlertDialog; accepts props `workspaceId: string`, `userId: string`, `username: string`, `onRemoved: () => void`; trigger is an icon button (Lucide `UserMinus`); dialog body: "Remove [username] from this workspace?"; confirm calls `api.workspaces.removeWorkspaceMember(workspaceId, userId)`; on success calls `onRemoved()` and `toast.success`; on error `toast.error`; manages `isPending` state
-- [ ] T018 [US4] Create `components/workspaces/workspace-members-view.tsx` — Client Component; accepts `workspaceId: string` prop; fetches `api.workspaces.listWorkspaceMembers(workspaceId)` and derives `userRole` from `api.workspaces.listWorkspaces()` on mount; manages `members`, `userRole`, `isLoading`, `error` state; renders `<h1>Members</h1>`, Back link to `/workspaces/[id]`; conditionally renders `<InviteMemberForm />` when `userRole` is `'owner'` or `'admin'`; renders member rows (username, email, role Badge, joined date) with `<RemoveMemberButton />` per row hidden when `member.userId` equals current user's ID or when `member.role === 'owner'` and `userRole !== 'owner'`; `onInviteSent` and `onRemoved` callbacks trigger re-fetch of members list (depends on T016, T017)
-- [ ] T019 [US4] Create `app/(app)/workspaces/[id]/members/page.tsx` — Server Component that exports `metadata` (`title: 'Workspace Members — iManager'`, `robots: 'noindex'`) and renders `<WorkspaceMembersView workspaceId={params.id} />` (depends on T018)
+- [X] T016 [P] [US4] Create `components/workspaces/invite-member-form.tsx` — Client Component using TanStack Form with `InviteMemberSchema`; accepts props `workspaceId: string`, `onInviteSent: () => void`; renders email Input + Shadcn Select for role (options: member, admin; default member) + Submit button; calls `api.workspaces.inviteToWorkspace(workspaceId, { email, role })` on submit; on success resets form, calls `onInviteSent()`, and `toast.success`; shows server error banner on failure; submit disabled while submitting
+- [X] T017 [P] [US4] Create `components/workspaces/remove-member-button.tsx` — Client Component using Shadcn AlertDialog; accepts props `workspaceId: string`, `userId: string`, `username: string`, `onRemoved: () => void`; trigger is an icon button (Lucide `UserMinus`); dialog body: "Remove [username] from this workspace?"; confirm calls `api.workspaces.removeWorkspaceMember(workspaceId, userId)`; on success calls `onRemoved()` and `toast.success`; on error `toast.error`; manages `isPending` state
+- [X] T018 [US4] Create `components/workspaces/workspace-members-view.tsx` — Client Component; accepts `workspaceId: string` prop; fetches `api.workspaces.listWorkspaceMembers(workspaceId)` and derives `userRole` from `api.workspaces.listWorkspaces()` on mount; manages `members`, `userRole`, `isLoading`, `error` state; renders `<h1>Members</h1>`, Back link to `/workspaces/[id]`; conditionally renders `<InviteMemberForm />` when `userRole` is `'owner'` or `'admin'`; renders member rows (username, email, role Badge, joined date) with `<RemoveMemberButton />` per row hidden when `member.userId` equals current user's ID or when `member.role === 'owner'` and `userRole !== 'owner'`; `onInviteSent` and `onRemoved` callbacks trigger re-fetch of members list (depends on T016, T017)
+- [X] T019 [US4] Create `app/(app)/workspaces/[id]/members/page.tsx` — Server Component that exports `metadata` (`title: 'Workspace Members — iManager'`, `robots: 'noindex'`) and renders `<WorkspaceMembersView workspaceId={params.id} />` (depends on T018)
 
 **Checkpoint**: US4 fully functional — members page works independently; role gating verified.
 
@@ -121,9 +121,9 @@ page can be rendered. No user story work can begin until this phase is complete.
 
 **Purpose**: Improvements that affect all user stories.
 
-- [ ] T020 [P] Add Skeleton loading states to `workspace-list-view.tsx` and `workspace-members-view.tsx` using the Shadcn Skeleton component to prevent CLS (Constitution Principle III)
-- [ ] T021 [P] Audit all workspace pages and components for a11y: verify one `<h1>` per page, all inputs have associated `<Label>`, all `aria-invalid` and `aria-describedby` are set on fields with errors (matching `login-form.tsx` pattern)
-- [ ] T022 [P] Run `pnpm lint` and `pnpm build` to verify zero TypeScript errors and zero ESLint violations across all new files
+- [X] T020 [P] Add Skeleton loading states to `workspace-list-view.tsx` and `workspace-members-view.tsx` using the Shadcn Skeleton component to prevent CLS (Constitution Principle III)
+- [X] T021 [P] Audit all workspace pages and components for a11y: verify one `<h1>` per page, all inputs have associated `<Label>`, all `aria-invalid` and `aria-describedby` are set on fields with errors (matching `login-form.tsx` pattern)
+- [X] T022 [P] Run `pnpm lint` and `pnpm build` to verify zero TypeScript errors and zero ESLint violations across all new files
 - [ ] T023 Run through quickstart.md validation checklist (`specs/001-workspace-backend-integration/quickstart.md`) end-to-end as a signed-in user
 
 ---

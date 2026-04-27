@@ -379,7 +379,7 @@ function BrandLogo() {
 }
 
 function KanbanMockup() {
-	const cols = [
+	const cols: { label: string; count: number; active?: boolean; cards: { title: string; tag: string; pct?: number }[] }[] = [
 		{
 			label: 'Backlog',
 			count: 3,
