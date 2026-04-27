@@ -1,14 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import {
-	LayoutDashboard,
-	CheckSquare,
-	Users,
-	BarChart3,
-	Zap,
-	ShieldCheck,
-	Check,
-	ArrowRight,
-} from 'lucide-react';
+import { LayoutDashboard, CheckSquare, Users, BarChart3, Zap, ShieldCheck, Check, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -21,8 +12,7 @@ const jsonLd = {
 	name: 'iManager',
 	applicationCategory: 'BusinessApplication',
 	operatingSystem: 'Web',
-	description:
-		'Unified project management platform with kanban boards, task tracking, and team collaboration.',
+	description: 'Unified project management platform with kanban boards, task tracking, and team collaboration.',
 	offers: [
 		{ '@type': 'Offer', name: 'Free', price: '0', priceCurrency: 'USD' },
 		{
@@ -81,8 +71,7 @@ export default function Home() {
 					<div
 						className='absolute inset-0 pointer-events-none select-none'
 						style={{
-							backgroundImage:
-								'radial-gradient(circle, oklch(0.6 0 0 / 0.09) 1px, transparent 1px)',
+							backgroundImage: 'radial-gradient(circle, oklch(0.6 0 0 / 0.09) 1px, transparent 1px)',
 							backgroundSize: '28px 28px',
 						}}
 						aria-hidden='true'
@@ -91,8 +80,7 @@ export default function Home() {
 					<div
 						className='absolute inset-0 pointer-events-none'
 						style={{
-							background:
-								'radial-gradient(ellipse 70% 55% at 50% 50%, transparent 30%, var(--background) 75%)',
+							background: 'radial-gradient(ellipse 70% 55% at 50% 50%, transparent 30%, var(--background) 75%)',
 						}}
 						aria-hidden='true'
 					/>
@@ -120,8 +108,8 @@ export default function Home() {
 								<p
 									className='animate-in fade-in slide-in-from-bottom-4 duration-500 text-lg text-muted-foreground leading-relaxed mb-8 max-w-[480px]'
 									style={{ animationDelay: '160ms', animationFillMode: 'backwards' }}>
-									iManager brings kanban boards, task tracking, and team collaboration
-									into one focused workspace — so your team ships instead of syncing.
+									iManager brings kanban boards, task tracking, and team collaboration into one focused workspace — so
+									your team ships instead of syncing.
 								</p>
 
 								<div
@@ -158,9 +146,7 @@ export default function Home() {
 										))}
 									</div>
 									<span>
-										Trusted by{' '}
-										<strong className='text-foreground font-semibold'>2,400+</strong>{' '}
-										teams
+										Trusted by <strong className='text-foreground font-semibold'>2,400+</strong> teams
 									</span>
 									<span className='text-border'>·</span>
 									<span>Free to start</span>
@@ -184,17 +170,14 @@ export default function Home() {
 					className='py-24 border-b border-border/30'>
 					<div className='mx-auto max-w-6xl px-6'>
 						<div className='text-center mb-16'>
-							<p className='text-xs font-mono tracking-[0.2em] uppercase text-muted-foreground mb-3'>
-								Features
-							</p>
+							<p className='text-xs font-mono tracking-[0.2em] uppercase text-muted-foreground mb-3'>Features</p>
 							<h2
 								id='features-heading'
 								className='text-3xl sm:text-4xl font-bold tracking-tight mb-4'>
 								Everything your team needs
 							</h2>
 							<p className='text-muted-foreground text-lg max-w-lg mx-auto'>
-								One platform that replaces five scattered tools. Built for teams that
-								ship.
+								One platform that replaces five scattered tools. Built for teams that ship.
 							</p>
 						</div>
 
@@ -217,17 +200,14 @@ export default function Home() {
 					className='py-24 bg-muted/30 border-b border-border/30'>
 					<div className='mx-auto max-w-6xl px-6'>
 						<div className='text-center mb-16'>
-							<p className='text-xs font-mono tracking-[0.2em] uppercase text-muted-foreground mb-3'>
-								Process
-							</p>
+							<p className='text-xs font-mono tracking-[0.2em] uppercase text-muted-foreground mb-3'>Process</p>
 							<h2
 								id='how-heading'
 								className='text-3xl sm:text-4xl font-bold tracking-tight mb-4'>
 								Up and running in minutes
 							</h2>
 							<p className='text-muted-foreground text-lg max-w-lg mx-auto'>
-								No complex onboarding. Sign up and start managing your first project
-								today.
+								No complex onboarding. Sign up and start managing your first project today.
 							</p>
 						</div>
 
@@ -255,9 +235,7 @@ export default function Home() {
 					className='py-24 border-b border-border/30'>
 					<div className='mx-auto max-w-6xl px-6'>
 						<div className='text-center mb-16'>
-							<p className='text-xs font-mono tracking-[0.2em] uppercase text-muted-foreground mb-3'>
-								Pricing
-							</p>
+							<p className='text-xs font-mono tracking-[0.2em] uppercase text-muted-foreground mb-3'>Pricing</p>
 							<h2
 								id='pricing-heading'
 								className='text-3xl sm:text-4xl font-bold tracking-tight mb-4'>
@@ -285,12 +263,9 @@ export default function Home() {
 					className='py-24'>
 					<div className='mx-auto max-w-6xl px-6'>
 						<div className='rounded-2xl border border-border bg-muted/40 px-8 py-16 text-center'>
-							<h2 className='text-3xl sm:text-4xl font-bold tracking-tight mb-4'>
-								Ready to ship faster?
-							</h2>
+							<h2 className='text-3xl sm:text-4xl font-bold tracking-tight mb-4'>Ready to ship faster?</h2>
 							<p className='text-muted-foreground text-lg mb-8 max-w-md mx-auto'>
-								Join 2,400+ teams who replaced scattered tools with iManager. No
-								credit card required.
+								Join 2,400+ teams who replaced scattered tools with iManager. No credit card required.
 							</p>
 							<Button
 								size='lg'
@@ -313,8 +288,7 @@ export default function Home() {
 						<div className='max-w-[220px]'>
 							<BrandLogo />
 							<p className='mt-3 text-sm text-muted-foreground leading-relaxed'>
-								Manage projects, deliver results. Built for teams that care about
-								shipping.
+								Manage projects, deliver results. Built for teams that care about shipping.
 							</p>
 						</div>
 
@@ -443,9 +417,7 @@ function KanbanMockup() {
 						className={`size-2.5 rounded-full ${c}`}
 					/>
 				))}
-				<span className='ml-3 text-xs text-muted-foreground font-mono'>
-					Q2 Sprint · Design System
-				</span>
+				<span className='ml-3 text-xs text-muted-foreground font-mono'>Q2 Sprint · Design System</span>
 			</div>
 
 			{/* board */}
@@ -455,24 +427,16 @@ function KanbanMockup() {
 						key={col.label}
 						className='flex-1 min-w-0'>
 						<div className='flex items-center gap-1.5 mb-3'>
-							<div
-								className={`size-1.5 rounded-full ${col.active ? 'bg-foreground' : 'bg-border'}`}
-							/>
-							<span className='text-[11px] font-medium text-muted-foreground'>
-								{col.label}
-							</span>
-							<span className='ml-auto text-[10px] text-muted-foreground/60 tabular-nums'>
-								{col.count}
-							</span>
+							<div className={`size-1.5 rounded-full ${col.active ? 'bg-foreground' : 'bg-border'}`} />
+							<span className='text-[11px] font-medium text-muted-foreground'>{col.label}</span>
+							<span className='ml-auto text-[10px] text-muted-foreground/60 tabular-nums'>{col.count}</span>
 						</div>
 						<div className='space-y-2'>
 							{col.cards.map((card) => (
 								<div
 									key={card.title}
 									className='rounded-lg border border-border bg-background p-2.5 hover:shadow-sm transition-shadow'>
-									<p className='text-[11px] font-medium text-foreground leading-snug mb-2'>
-										{card.title}
-									</p>
+									<p className='text-[11px] font-medium text-foreground leading-snug mb-2'>{card.title}</p>
 									<div className='flex items-center justify-between gap-2'>
 										<span className='text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-medium'>
 											{card.tag}
@@ -485,9 +449,7 @@ function KanbanMockup() {
 														style={{ width: `${card.pct}%` }}
 													/>
 												</div>
-												<span className='text-[9px] text-muted-foreground tabular-nums'>
-													{card.pct}%
-												</span>
+												<span className='text-[9px] text-muted-foreground tabular-nums'>{card.pct}%</span>
 											</div>
 										)}
 									</div>
@@ -526,13 +488,7 @@ function KanbanMockup() {
 	);
 }
 
-function FeatureCard({
-	feat,
-	index,
-}: {
-	feat: (typeof FEATURES)[0];
-	index: number;
-}) {
+function FeatureCard({ feat, index }: { feat: (typeof FEATURES)[0]; index: number }) {
 	return (
 		<Card
 			className='animate-in fade-in slide-in-from-bottom-3 duration-500 group border-border/60 hover:-translate-y-0.5 transition-transform'
@@ -551,13 +507,7 @@ function FeatureCard({
 	);
 }
 
-function StepCard({
-	step,
-	index,
-}: {
-	step: (typeof STEPS)[0];
-	index: number;
-}) {
+function StepCard({ step, index }: { step: (typeof STEPS)[0]; index: number }) {
 	return (
 		<div className='flex flex-col items-center text-center'>
 			<div className='size-14 rounded-xl bg-foreground text-background flex items-center justify-center font-bold text-base font-mono mb-5 shrink-0 relative z-10'>
@@ -573,9 +523,7 @@ function PricingCard({ tier }: { tier: (typeof PRICING)[0] }) {
 	return (
 		<Card
 			className={
-				tier.popular
-					? 'border-foreground/25 shadow-md ring-1 ring-foreground/10 relative'
-					: 'border-border/60'
+				tier.popular ? 'border-foreground/25 shadow-md ring-1 ring-foreground/10 relative' : 'border-border/60'
 			}>
 			{tier.popular && (
 				<div className='absolute -top-3 left-1/2 -translate-x-1/2 bg-foreground text-background text-[10px] font-semibold px-3 py-1 rounded-full whitespace-nowrap'>
@@ -584,9 +532,7 @@ function PricingCard({ tier }: { tier: (typeof PRICING)[0] }) {
 			)}
 			<CardContent className='p-6 flex flex-col h-full'>
 				<div className='mb-5'>
-					<p className='text-xs font-mono tracking-widest uppercase text-muted-foreground mb-2'>
-						{tier.name}
-					</p>
+					<p className='text-xs font-mono tracking-widest uppercase text-muted-foreground mb-2'>{tier.name}</p>
 					<div className='flex items-baseline gap-1 mb-2'>
 						<span className='text-3xl font-bold tracking-tight'>${tier.price}</span>
 						<span className='text-sm text-muted-foreground'>{tier.suffix}</span>

@@ -13,51 +13,51 @@
 
 Represents a top-level organisational unit. A user can belong to many workspaces.
 
-| Field       | Type     | Notes                                       |
-|-------------|----------|---------------------------------------------|
-| `id`        | `string` | UUID, assigned by backend                   |
-| `name`      | `string` | 1–100 characters, unique per owner          |
-| `ownerId`   | `string` | User ID of the workspace creator/owner      |
-| `createdAt` | `string` | ISO 8601 datetime                           |
-| `updatedAt` | `string` | ISO 8601 datetime                           |
+| Field       | Type     | Notes                                  |
+| ----------- | -------- | -------------------------------------- |
+| `id`        | `string` | UUID, assigned by backend              |
+| `name`      | `string` | 1–100 characters, unique per owner     |
+| `ownerId`   | `string` | User ID of the workspace creator/owner |
+| `createdAt` | `string` | ISO 8601 datetime                      |
+| `updatedAt` | `string` | ISO 8601 datetime                      |
 
 ### WorkspaceWithRole
 
 Extends `Workspace`. Returned by `listWorkspaces()`. Carries the calling user's role
 so the frontend can apply role-based gating without a separate members call.
 
-| Field  | Type            | Notes                                       |
-|--------|-----------------|---------------------------------------------|
-| `role` | `WorkspaceRole` | `'owner' \| 'admin' \| 'member'`           |
-| `...`  |                 | All `Workspace` fields                      |
+| Field  | Type            | Notes                            |
+| ------ | --------------- | -------------------------------- |
+| `role` | `WorkspaceRole` | `'owner' \| 'admin' \| 'member'` |
+| `...`  |                 | All `Workspace` fields           |
 
 ### WorkspaceMember
 
 A user's membership record within a workspace.
 
-| Field      | Type            | Notes                          |
-|------------|-----------------|--------------------------------|
-| `userId`   | `string`        | UUID                           |
+| Field      | Type            | Notes                            |
+| ---------- | --------------- | -------------------------------- |
+| `userId`   | `string`        | UUID                             |
 | `role`     | `WorkspaceRole` | `'owner' \| 'admin' \| 'member'` |
-| `joinedAt` | `string`        | ISO 8601 datetime              |
-| `username` | `string`        | Display name                   |
-| `email`    | `string`        | Email address                  |
+| `joinedAt` | `string`        | ISO 8601 datetime                |
+| `username` | `string`        | Display name                     |
+| `email`    | `string`        | Email address                    |
 
 ### Invitation
 
 Created when an owner/admin invites someone by email.
 
-| Field         | Type               | Notes                                        |
-|---------------|--------------------|----------------------------------------------|
-| `id`          | `string`           | UUID                                         |
-| `token`       | `string`           | Opaque invitation token                      |
-| `email`       | `string`           | Invitee email                                |
-| `scope`       | `InvitationScope`  | `'workspace'` for this feature               |
-| `workspaceId` | `string \| null`   | Target workspace                             |
-| `role`        | `string`           | Invited role (`'admin' \| 'member'`)         |
+| Field         | Type               | Notes                                               |
+| ------------- | ------------------ | --------------------------------------------------- |
+| `id`          | `string`           | UUID                                                |
+| `token`       | `string`           | Opaque invitation token                             |
+| `email`       | `string`           | Invitee email                                       |
+| `scope`       | `InvitationScope`  | `'workspace'` for this feature                      |
+| `workspaceId` | `string \| null`   | Target workspace                                    |
+| `role`        | `string`           | Invited role (`'admin' \| 'member'`)                |
 | `status`      | `InvitationStatus` | `'pending' \| 'accepted' \| 'revoked' \| 'expired'` |
-| `expiresAt`   | `string`           | ISO 8601 datetime                            |
-| `createdAt`   | `string`           | ISO 8601 datetime                            |
+| `expiresAt`   | `string`           | ISO 8601 datetime                                   |
+| `createdAt`   | `string`           | ISO 8601 datetime                                   |
 
 ---
 
@@ -68,12 +68,12 @@ WorkspaceRole = 'owner' | 'admin' | 'member'
 ```
 
 | Role     | Rename workspace | Delete workspace | Invite member | Remove member | View members |
-|----------|:---:|:---:|:---:|:---:|:---:|
-| `owner`  | ✅  | ✅  | ✅  | ✅  | ✅  |
-| `admin`  | ✅  | ❌  | ✅  | ✅* | ✅  |
-| `member` | ❌  | ❌  | ❌  | ❌  | ✅  |
+| -------- | :--------------: | :--------------: | :-----------: | :-----------: | :----------: |
+| `owner`  |        ✅        |        ✅        |      ✅       |      ✅       |      ✅      |
+| `admin`  |        ✅        |        ❌        |      ✅       |     ✅\*      |      ✅      |
+| `member` |        ❌        |        ❌        |      ❌       |      ❌       |      ✅      |
 
-*Admins cannot remove the owner.
+\*Admins cannot remove the owner.
 
 ---
 
@@ -83,11 +83,12 @@ WorkspaceRole = 'owner' | 'admin' | 'member'
 
 ```ts
 z.object({
-  name: z.string()
-    .min(1, 'Workspace name is required')
-    .max(100, 'Workspace name must be 100 characters or fewer')
-    .trim(),
-})
+	name: z
+		.string()
+		.min(1, 'Workspace name is required')
+		.max(100, 'Workspace name must be 100 characters or fewer')
+		.trim(),
+});
 ```
 
 ### RenameWorkspaceSchema
@@ -98,9 +99,9 @@ Same shape as `CreateWorkspaceSchema`.
 
 ```ts
 z.object({
-  email: z.string().email('Enter a valid email address'),
-  role: z.enum(['admin', 'member']).default('member'),
-})
+	email: z.string().email('Enter a valid email address'),
+	role: z.enum(['admin', 'member']).default('member'),
+});
 ```
 
 ---

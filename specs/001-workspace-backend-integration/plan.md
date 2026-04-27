@@ -29,15 +29,15 @@ Complexity Tracking below
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+_GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 
-| Principle | Status | Notes |
-|---|---|---|
-| I. SEO-First | ✅ Pass | All pages export `generateMetadata`; authenticated pages use `robots: noindex` since content is user-specific and private |
-| II. Code Quality & Type Safety | ✅ Pass | No `any`; all props typed via interfaces or Zod-inferred types; ESLint/Prettier enforced |
-| III. Performance by Default | ⚠️ Justified exception | See Complexity Tracking — Axios client is client-side only; pages are Server Components but data-fetching views are Client Components |
-| IV. Component Architecture | ✅ Pass | Shadcn/Radix primitives used throughout; TanStack Form + Zod for all forms; no prop drilling beyond 2 levels |
-| V. Accessibility | ✅ Pass | Semantic HTML, `aria-*` attributes on form fields, keyboard-navigable dialogs via Radix AlertDialog |
+| Principle                      | Status                 | Notes                                                                                                                                 |
+| ------------------------------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| I. SEO-First                   | ✅ Pass                | All pages export `generateMetadata`; authenticated pages use `robots: noindex` since content is user-specific and private             |
+| II. Code Quality & Type Safety | ✅ Pass                | No `any`; all props typed via interfaces or Zod-inferred types; ESLint/Prettier enforced                                              |
+| III. Performance by Default    | ⚠️ Justified exception | See Complexity Tracking — Axios client is client-side only; pages are Server Components but data-fetching views are Client Components |
+| IV. Component Architecture     | ✅ Pass                | Shadcn/Radix primitives used throughout; TanStack Form + Zod for all forms; no prop drilling beyond 2 levels                          |
+| V. Accessibility               | ✅ Pass                | Semantic HTML, `aria-*` attributes on form fields, keyboard-navigable dialogs via Radix AlertDialog                                   |
 
 ## Project Structure
 
@@ -103,6 +103,6 @@ independently.
 
 ## Complexity Tracking
 
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|---|---|---|
+| Violation                                               | Why Needed                                                                                                                                                                                                                                                | Simpler Alternative Rejected Because                                                                                                                                   |
+| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Principle III: Client Components used for data fetching | The existing Axios client (`lib/api/client.ts`) targets `NEXT_PUBLIC_API_URL` with `withCredentials: true`. Server Components would require forwarding the `Cookie` request header to Axios on every render, which needs a server-side API client variant | Creating a server-side API client variant is a separate refactor outside this feature's scope; doing it here would add significant complexity with no spec requirement |

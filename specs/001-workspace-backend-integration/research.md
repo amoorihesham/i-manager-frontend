@@ -16,12 +16,14 @@ server-side client variant. Since the feature request explicitly says "using the
 already made," client-side fetching is the correct interpretation.
 
 **Pattern adopted**:
+
 - Page files are Server Components (for `generateMetadata`, HTML shell, zero JS overhead).
 - Each page renders a single Client Component "view" that owns the data fetching and
   interactive state via `useState` + `useEffect` (or TanStack Query in a future refactor).
 - Mutations (create, rename, delete, invite, remove) are triggered from Client Components.
 
 **Alternatives considered**:
+
 - Next.js server-side fetch with `cookies()` forwarding → deferred; requires API client refactor.
 - TanStack Query for caching/invalidation → valuable but adds a new dependency; deferred to a
   follow-up once the baseline integration is stable.
@@ -37,6 +39,7 @@ already made," client-side fetching is the correct interpretation.
 (sidebar, nav), and centralises the auth guard without touching existing routes.
 
 **Auth guard approach**:
+
 - `app/(app)/layout.tsx` is a Client Component.
 - On mount it calls `api.auth.me()` (or reads session state). If unauthenticated, it calls
   `router.push('/login')`.
@@ -45,6 +48,7 @@ already made," client-side fetching is the correct interpretation.
   `/workspaces` (update `login-form.tsx`).
 
 **Alternatives considered**:
+
 - Next.js Middleware (`middleware.ts`) for server-side auth redirect → preferred long-term,
   but requires knowing the session cookie name/structure; deferred.
 
@@ -56,20 +60,21 @@ already made," client-side fetching is the correct interpretation.
 `login-form.tsx` and `register-form.tsx` pattern exactly.
 
 **Pattern**:
+
 ```ts
 const form = useForm({
-  defaultValues: { name: '' },
-  validators: { onSubmit: SchemaName },
-  onSubmit: async ({ value }) => {
-    try {
-      await api.workspaces.createWorkspace(value);
-      toast.success('Workspace created');
-      router.push(`/workspaces/${result.data.id}`);
-    } catch (err) {
-      const apiErr = err as api.ApiError;
-      setServerError(apiErr?.error?.message ?? 'Something went wrong.');
-    }
-  },
+	defaultValues: { name: '' },
+	validators: { onSubmit: SchemaName },
+	onSubmit: async ({ value }) => {
+		try {
+			await api.workspaces.createWorkspace(value);
+			toast.success('Workspace created');
+			router.push(`/workspaces/${result.data.id}`);
+		} catch (err) {
+			const apiErr = err as api.ApiError;
+			setServerError(apiErr?.error?.message ?? 'Something went wrong.');
+		}
+	},
 });
 ```
 
@@ -94,6 +99,7 @@ The `shadcn add alert-dialog` command installs it.
 `WorkspaceWithRole.role` value returned by `listWorkspaces()` / `getWorkspace()`.
 
 **Rules**:
+
 - `role === 'owner'`: full access (rename, delete, invite, remove any member).
 - `role === 'admin'`: rename, invite, remove non-owner members.
 - `role === 'member'`: read-only access; management controls hidden.
@@ -119,6 +125,7 @@ behaviour since owner is assigned only at workspace creation.
 ## Decision 7: Navigation After Create/Delete
 
 **Decision**:
+
 - After **create workspace** → navigate to `/workspaces/[newId]`.
 - After **delete workspace** → navigate to `/workspaces` (list).
 - After **rename** / member actions → stay on current page; show success toast and
@@ -130,14 +137,14 @@ behaviour since owner is assigned only at workspace creation.
 
 Components not yet installed that this feature requires:
 
-| Component | Command |
-|---|---|
+| Component   | Command                                   |
+| ----------- | ----------------------------------------- |
 | AlertDialog | `pnpm dlx shadcn@latest add alert-dialog` |
-| Badge | `pnpm dlx shadcn@latest add badge` |
-| Dialog | `pnpm dlx shadcn@latest add dialog` |
-| Select | `pnpm dlx shadcn@latest add select` |
-| Separator | `pnpm dlx shadcn@latest add separator` |
-| Skeleton | `pnpm dlx shadcn@latest add skeleton` |
+| Badge       | `pnpm dlx shadcn@latest add badge`        |
+| Dialog      | `pnpm dlx shadcn@latest add dialog`       |
+| Select      | `pnpm dlx shadcn@latest add select`       |
+| Separator   | `pnpm dlx shadcn@latest add separator`    |
+| Skeleton    | `pnpm dlx shadcn@latest add skeleton`     |
 
 Already installed: Button, Card, Input, Label.
 
@@ -146,6 +153,7 @@ Already installed: Button, Card, Input, Label.
 ## Decision 9: Loading & Error States
 
 **Decision**:
+
 - **Loading**: Render Skeleton components while data is being fetched (prevents CLS —
   Constitution Principle III, CLS ≤ 0.1).
 - **Error**: Show an inline error banner (same pattern as auth forms) and a retry button.

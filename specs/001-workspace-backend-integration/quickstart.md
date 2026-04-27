@@ -31,18 +31,18 @@ Create `lib/workspaces/schemas.ts`:
 import { z } from 'zod';
 
 export const CreateWorkspaceSchema = z.object({
-  name: z
-    .string()
-    .min(1, 'Workspace name is required')
-    .max(100, 'Workspace name must be 100 characters or fewer')
-    .trim(),
+	name: z
+		.string()
+		.min(1, 'Workspace name is required')
+		.max(100, 'Workspace name must be 100 characters or fewer')
+		.trim(),
 });
 
 export const RenameWorkspaceSchema = CreateWorkspaceSchema;
 
 export const InviteMemberSchema = z.object({
-  email: z.string().email('Enter a valid email address'),
-  role: z.enum(['admin', 'member']).default('member'),
+	email: z.string().email('Enter a valid email address'),
+	role: z.enum(['admin', 'member']).default('member'),
 });
 
 export type CreateWorkspaceInput = z.infer<typeof CreateWorkspaceSchema>;
@@ -75,21 +75,21 @@ import { useRouter } from 'next/navigation';
 import * as api from '@/lib/api';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const [checked, setChecked] = useState(false);
+	const router = useRouter();
+	const [checked, setChecked] = useState(false);
 
-  useEffect(() => {
-    // Replace with actual auth check when api.auth.me() is available
-    // For now: if listWorkspaces() throws 401, redirect to login
-    api.workspaces
-      .listWorkspaces()
-      .catch(() => router.push('/login'))
-      .finally(() => setChecked(true));
-  }, [router]);
+	useEffect(() => {
+		// Replace with actual auth check when api.auth.me() is available
+		// For now: if listWorkspaces() throws 401, redirect to login
+		api.workspaces
+			.listWorkspaces()
+			.catch(() => router.push('/login'))
+			.finally(() => setChecked(true));
+	}, [router]);
 
-  if (!checked) return null; // or a full-screen skeleton
+	if (!checked) return null; // or a full-screen skeleton
 
-  return <>{children}</>;
+	return <>{children}</>;
 }
 ```
 
@@ -104,17 +104,17 @@ import type { Metadata } from 'next';
 import { WorkspaceListView } from '@/components/workspaces/workspace-list-view';
 
 export const metadata: Metadata = {
-  title: 'Workspaces — iManager',
-  robots: 'noindex',
+	title: 'Workspaces — iManager',
+	robots: 'noindex',
 };
 
 export default function WorkspacesPage() {
-  return (
-    <main className='mx-auto max-w-5xl px-6 py-10'>
-      <h1 className='text-2xl font-bold tracking-tight mb-6'>Workspaces</h1>
-      <WorkspaceListView />
-    </main>
-  );
+	return (
+		<main className='mx-auto max-w-5xl px-6 py-10'>
+			<h1 className='text-2xl font-bold tracking-tight mb-6'>Workspaces</h1>
+			<WorkspaceListView />
+		</main>
+	);
 }
 ```
 
@@ -136,26 +136,26 @@ import * as api from '@/lib/api';
 import { CreateWorkspaceSchema } from '@/lib/workspaces/schemas';
 
 export function CreateWorkspaceForm() {
-  const router = useRouter();
-  const [serverError, setServerError] = useState<string | null>(null);
+	const router = useRouter();
+	const [serverError, setServerError] = useState<string | null>(null);
 
-  const form = useForm({
-    defaultValues: { name: '' },
-    validators: { onSubmit: CreateWorkspaceSchema },
-    onSubmit: async ({ value }) => {
-      setServerError(null);
-      try {
-        const result = await api.workspaces.createWorkspace(value);
-        toast.success(result.message);
-        router.push(`/workspaces/${result.data.id}`);
-      } catch (err) {
-        const apiErr = err as api.ApiError;
-        setServerError(apiErr?.error?.message ?? 'Something went wrong.');
-      }
-    },
-  });
+	const form = useForm({
+		defaultValues: { name: '' },
+		validators: { onSubmit: CreateWorkspaceSchema },
+		onSubmit: async ({ value }) => {
+			setServerError(null);
+			try {
+				const result = await api.workspaces.createWorkspace(value);
+				toast.success(result.message);
+				router.push(`/workspaces/${result.data.id}`);
+			} catch (err) {
+				const apiErr = err as api.ApiError;
+				setServerError(apiErr?.error?.message ?? 'Something went wrong.');
+			}
+		},
+	});
 
-  // ... render form fields following login-form.tsx field pattern
+	// ... render form fields following login-form.tsx field pattern
 }
 ```
 

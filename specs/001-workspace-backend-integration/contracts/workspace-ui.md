@@ -19,8 +19,8 @@ and the interactions it exposes.
 
 ```ts
 export const metadata: Metadata = {
-  title: 'Workspaces — iManager',
-  robots: 'noindex',
+	title: 'Workspaces — iManager',
+	robots: 'noindex',
 };
 ```
 
@@ -66,8 +66,8 @@ Interactions: none (pure display + navigation link)
 
 ```ts
 export const metadata: Metadata = {
-  title: 'New Workspace — iManager',
-  robots: 'noindex',
+	title: 'New Workspace — iManager',
+	robots: 'noindex',
 };
 ```
 
@@ -102,8 +102,8 @@ Interactions:
 ```ts
 // metadata is dynamic — workspace name fetched client-side, fallback title used
 export const metadata: Metadata = {
-  title: 'Workspace — iManager',
-  robots: 'noindex',
+	title: 'Workspace — iManager',
+	robots: 'noindex',
 };
 ```
 
@@ -137,8 +137,8 @@ API calls:
 
 ```ts
 export const metadata: Metadata = {
-  title: 'Workspace Settings — iManager',
-  robots: 'noindex',
+	title: 'Workspace Settings — iManager',
+	robots: 'noindex',
 };
 ```
 
@@ -214,8 +214,8 @@ Interactions:
 
 ```ts
 export const metadata: Metadata = {
-  title: 'Workspace Members — iManager',
-  robots: 'noindex',
+	title: 'Workspace Members — iManager',
+	robots: 'noindex',
 };
 ```
 
@@ -320,13 +320,14 @@ All API errors follow `ApiError` from `lib/api/types.ts`:
 
 ```ts
 interface ApiError {
-  success: false;
-  error: { code: string; message: string };
-  upgradeUrl?: string;
+	success: false;
+	error: { code: string; message: string };
+	upgradeUrl?: string;
 }
 ```
 
 **Component-level rule**:
+
 - Form submissions → set `serverError` state → render inline error banner above submit button.
 - Non-form mutations (delete, remove) → `toast.error(apiErr.error.message)`.
 - Data loading failures → set `error` state → render inline banner with retry button.

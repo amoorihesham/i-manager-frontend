@@ -129,19 +129,19 @@ Semantic HTML is the shared foundation of SEO and accessibility.
 This project's approved technology stack is fixed. Deviations require a constitution
 amendment with documented rationale.
 
-| Concern | Approved Technology |
-|---|---|
-| Framework | Next.js 16 (App Router) |
-| Language | TypeScript 5 (strict mode) |
-| Styling | Tailwind CSS 4 |
-| UI Primitives | Shadcn UI + Radix UI |
-| Forms | TanStack Form + Zod |
-| HTTP Client | Axios |
-| Icons | Lucide React |
-| Notifications | Sonner |
-| Formatting | Prettier 3 |
-| Linting | ESLint 9 + eslint-config-next |
-| Package Manager | pnpm |
+| Concern         | Approved Technology           |
+| --------------- | ----------------------------- |
+| Framework       | Next.js 16 (App Router)       |
+| Language        | TypeScript 5 (strict mode)    |
+| Styling         | Tailwind CSS 4                |
+| UI Primitives   | Shadcn UI + Radix UI          |
+| Forms           | TanStack Form + Zod           |
+| HTTP Client     | Axios                         |
+| Icons           | Lucide React                  |
+| Notifications   | Sonner                        |
+| Formatting      | Prettier 3                    |
+| Linting         | ESLint 9 + eslint-config-next |
+| Package Manager | pnpm                          |
 
 New dependencies MUST be evaluated for: bundle weight, maintenance status, license
 compatibility, and whether an existing approved library already covers the need.
@@ -165,6 +165,7 @@ This constitution supersedes all informal conventions, prior README guidance, an
 verbal agreements. When a PR conflicts with a principle stated here, the constitution wins.
 
 **Amendment procedure**:
+
 1. Open a PR with the proposed change to this file.
 2. State the principle being amended, the reason, and any migration impact.
 3. Increment `CONSTITUTION_VERSION` per semantic versioning rules.
@@ -172,6 +173,7 @@ verbal agreements. When a PR conflicts with a principle stated here, the constit
 5. Propagate changes to affected templates in `.specify/templates/`.
 
 **Versioning policy**:
+
 - MAJOR: A principle is removed or its non-negotiable rules are weakened.
 - MINOR: A new principle or mandatory section is added.
 - PATCH: Wording clarifications, typo fixes, non-semantic refinements.

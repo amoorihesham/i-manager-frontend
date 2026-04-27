@@ -5,7 +5,7 @@
 **Status**: Draft
 **Input**: User description: "integrate with the backend for the workspaces flow using the api-client already made"
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
 ### User Story 1 — View Workspace List & Enter a Workspace (Priority: P1)
 
@@ -130,7 +130,7 @@ they are no longer listed.
 - How are concurrent edits handled (e.g., another admin renames the workspace
   while the current user is viewing it)?
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
@@ -167,7 +167,7 @@ they are no longer listed.
 - **Invitation**: A pending request for a user (identified by email) to join a
   workspace; has a status (pending, accepted, revoked, expired).
 
-## Success Criteria *(mandatory)*
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 
