@@ -10,12 +10,6 @@
 		"format": "prettier -w .",
 		"prepare": "husky"
 	},
-	"lint-staged": {
-		"**/*": [
-			"eslint --fix",
-			"prettier -w ."
-		]
-	},
 	"dependencies": {
 		"@tanstack/react-form": "^1.29.1",
 		"@vercel/analytics": "^2.0.1",
