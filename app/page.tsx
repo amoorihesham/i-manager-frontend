@@ -106,7 +106,7 @@ export default function Home() {
 								</h1>
 
 								<p
-									className='animate-in fade-in slide-in-from-bottom-4 duration-500 text-lg text-muted-foreground leading-relaxed mb-8 max-w-[480px]'
+									className='animate-in fade-in slide-in-from-bottom-4 duration-500 text-lg text-muted-foreground leading-relaxed mb-8 max-w-120'
 									style={{ animationDelay: '160ms', animationFillMode: 'backwards' }}>
 									iManager brings kanban boards, task tracking, and team collaboration into one focused workspace — so
 									your team ships instead of syncing.
@@ -285,7 +285,7 @@ export default function Home() {
 			<footer className='border-t border-border/50 py-14'>
 				<div className='mx-auto max-w-6xl px-6'>
 					<div className='flex flex-col md:flex-row justify-between gap-10 mb-10'>
-						<div className='max-w-[220px]'>
+						<div className='max-w-55'>
 							<BrandLogo />
 							<p className='mt-3 text-sm text-muted-foreground leading-relaxed'>
 								Manage projects, deliver results. Built for teams that care about shipping.
